@@ -35,7 +35,7 @@ import umm3601.Controller;
 public class TodoController implements Controller {
 
   private static final String API_TODO = "/api/todos";
-  private static final String API_TODO_BY_ID = "/api/todos/{id}";
+ // private static final String API_TODO_BY_ID = "/api/todos/{id}";
   static final String OWNER_KEY = "owner";
   static final String STATUS_KEY = "status";
   static final String BODY_KEY = "body";
@@ -52,31 +52,31 @@ public class TodoController implements Controller {
         UuidRepresentation.STANDARD);
   }
 
-  public void getTodo(Context ctx) {
-    String id = ctx.pathParam("id");
-    Todo todo;
+  // public void getTodo(Context ctx) {
+  //   String id = ctx.pathParam("id");
+  //   Todo todo;
 
-    try {
-      todo = todoCollection.find(eq("_id", new ObjectId(id))).first();
-    } catch (IllegalArgumentException e) {
-      throw new BadRequestResponse("The requested user id wasn't a legal Mongo Object ID.");
-    }
-    if (todo == null) {
-      throw new NotFoundResponse("The requested todo was not found");
-    } else {
-      ctx.json(todo);
-      ctx.status(HttpStatus.OK);
-    }
-  }
+  //   try {
+  //     todo = todoCollection.find(eq("_id", new ObjectId(id))).first();
+  //   } catch (IllegalArgumentException e) {
+  //     throw new BadRequestResponse("The requested user id wasn't a legal Mongo Object ID.");
+  //   }
+  //   if (todo == null) {
+  //     throw new NotFoundResponse("The requested todo was not found");
+  //   } else {
+  //     ctx.json(todo);
+  //     ctx.status(HttpStatus.OK);
+  //   }
+  // }
 
 
   public void getTodos(Context ctx) {
     Bson combinedFilter = constructFilter(ctx);
-    Bson sortingOrder = constructSortingOrder(ctx);
+    // Bson sortingOrder = constructSortingOrder(ctx);
 
     ArrayList<Todo> matchingTodos = todoCollection
       .find(combinedFilter)
-      .sort(sortingOrder)
+      // .sort(sortingOrder)
       .into(new ArrayList<>());
 
     ctx.json(matchingTodos);
@@ -87,66 +87,69 @@ public class TodoController implements Controller {
   private Bson constructFilter(Context ctx) {
     List<Bson> filters = new ArrayList<>(); // start with an empty list of filters
 
-    if (ctx.queryParamMap().containsKey(CAT_KEY)) {
-      Pattern pattern = Pattern.compile(Pattern.quote(ctx.queryParam(CAT_KEY)), Pattern.CASE_INSENSITIVE);
-      filters.add(regex(CAT_KEY, pattern));
-    }
-
+    // if (ctx.queryParamMap().containsKey(CAT_KEY)) {
+    //   Pattern pattern = Pattern.compile(Pattern.quote(ctx.queryParam(CAT_KEY)), Pattern.CASE_INSENSITIVE);
+    //   filters.add(regex(CAT_KEY, pattern));
+    // }
+    // if (ctx.queryParamMap().containsKey(CAT_KEY)) {
+    //   Pattern pattern = Pattern.compile(Pattern.quote(ctx.queryParam(CAT_KEY)), Pattern.CASE_INSENSITIVE);
+    //   filters.add(regex(CAT_KEY, pattern));
+    // }
     // Combine the list of filters into a single filtering document.
     Bson combinedFilter = filters.isEmpty() ? new Document() : and(filters);
 
     return combinedFilter;
   }
 
-  private Bson constructSortingOrder(Context ctx) {
-    String sortBy = Objects.requireNonNullElse(ctx.queryParam("sortby"), "name");
-    String sortOrder = Objects.requireNonNullElse(ctx.queryParam("sortorder"), "asc");
-    Bson sortingOrder = sortOrder.equals("desc") ?  Sorts.descending(sortBy) : Sorts.ascending(sortBy);
-    return sortingOrder;
-  }
+  // private Bson constructSortingOrder(Context ctx) {
+  //   String sortBy = Objects.requireNonNullElse(ctx.queryParam("sortby"), "name");
+  //   String sortOrder = Objects.requireNonNullElse(ctx.queryParam("sortorder"), "asc");
+  //   Bson sortingOrder = sortOrder.equals("desc") ?  Sorts.descending(sortBy) : Sorts.ascending(sortBy);
+  //   return sortingOrder;
+  // }
 
 
-  public void addNewTodo(Context ctx) {
+  // public void addNewTodo(Context ctx) {
 
-    String body = ctx.body();
-    Todo newTodo = ctx.bodyValidator(Todo.class)
-      .check(td -> td.owner != null && td.owner.length() > 0,
-        "Todo must have a non-empty owner name; body was " + body)
-      .check(td -> td.body != null && td.body.length() > 0,
-        "Todo must have a non-empty body name; body was " + body)
-      .check(td -> td.category != null && td.category.length() > 0,
-        "Todo must have a non-empty category name; body was " + body)
-      .check(td -> td.status, "Todo must have a status.")
-      .get();
+  //   String body = ctx.body();
+  //   Todo newTodo = ctx.bodyValidator(Todo.class)
+  //     .check(td -> td.owner != null && td.owner.length() > 0,
+  //       "Todo must have a non-empty owner name; body was " + body)
+  //     .check(td -> td.body != null && td.body.length() > 0,
+  //       "Todo must have a non-empty body name; body was " + body)
+  //     .check(td -> td.category != null && td.category.length() > 0,
+  //       "Todo must have a non-empty category name; body was " + body)
+  //     .check(td -> td.status, "Todo must have a status.")
+  //     .get();
 
-    todoCollection.insertOne(newTodo);
+  //   todoCollection.insertOne(newTodo);
 
-    // Set the JSON response to be the `_id` of the newly created user.
-    // This gives the client the opportunity to know the ID of the new user,
-    // which it can then use to perform further operations (e.g., a GET request
-    // to get and display the details of the new user).
-    ctx.json(Map.of("id", newTodo._id));
-    // 201 (`HttpStatus.CREATED`) is the HTTP code for when we successfully
-    // create a new resource (a user in this case).
-    // See, e.g., https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
-    // for a description of the various response codes.
-    ctx.status(HttpStatus.CREATED);
-  }
+  //   // Set the JSON response to be the `_id` of the newly created user.
+  //   // This gives the client the opportunity to know the ID of the new user,
+  //   // which it can then use to perform further operations (e.g., a GET request
+  //   // to get and display the details of the new user).
+  //   ctx.json(Map.of("id", newTodo._id));
+  //   // 201 (`HttpStatus.CREATED`) is the HTTP code for when we successfully
+  //   // create a new resource (a user in this case).
+  //   // See, e.g., https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+  //   // for a description of the various response codes.
+  //   ctx.status(HttpStatus.CREATED);
+  // }
 
 
-  public void deleteTodo(Context ctx) {
-    String id = ctx.pathParam("id");
-    DeleteResult deleteResult = todoCollection.deleteOne(eq("_id", new ObjectId(id)));
+  // public void deleteTodo(Context ctx) {
+  //   String id = ctx.pathParam("id");
+  //   DeleteResult deleteResult = todoCollection.deleteOne(eq("_id", new ObjectId(id)));
 
-    if (deleteResult.getDeletedCount() != 1) {
-      ctx.status(HttpStatus.NOT_FOUND);
-      throw new NotFoundResponse(
-        "Was unable to delete ID "
-          + id
-          + "; perhaps illegal ID or an ID for an item not in the system?");
-    }
-    ctx.status(HttpStatus.OK);
-  }
+  //   if (deleteResult.getDeletedCount() != 1) {
+  //     ctx.status(HttpStatus.NOT_FOUND);
+  //     throw new NotFoundResponse(
+  //       "Was unable to delete ID "
+  //         + id
+  //         + "; perhaps illegal ID or an ID for an item not in the system?");
+  //   }
+  //   ctx.status(HttpStatus.OK);
+  // }
 
   // String generateAvatar(String email) {
   //   String avatar;
@@ -175,13 +178,13 @@ public class TodoController implements Controller {
   @Override
   public void addRoutes(Javalin server) {
 
-    server.get(API_TODO_BY_ID, this::getTodo);
+    // server.get(API_TODO_BY_ID, this::getTodo);
 
     server.get(API_TODO, this::getTodos);
 
-    server.post(API_TODO, this::addNewTodo);
+    // server.post(API_TODO, this::addNewTodo);
 
-    server.delete(API_TODO_BY_ID, this::deleteTodo);
+    // server.delete(API_TODO_BY_ID, this::deleteTodo);
   }
 
 }
