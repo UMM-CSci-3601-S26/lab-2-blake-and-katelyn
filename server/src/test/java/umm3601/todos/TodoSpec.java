@@ -12,44 +12,44 @@ public class TodoSpec {
   private static final String FAKE_ID_STRING_1 = "fakeIdOne";
   private static final String FAKE_ID_STRING_2 = "fakeIdTwo";
 
-  private Todo Todo1;
-  private Todo Todo2;
+  private Todo todo1;
+  private Todo todo2;
 
   @BeforeEach
   void setupEach() {
-    Todo1 = new Todo();
-    Todo2 = new Todo();
+    todo1 = new Todo();
+    todo2 = new Todo();
   }
 
   @Test
-  void TodosWithEqualIdAreEqual() {
-    Todo1._id = FAKE_ID_STRING_1;
-    Todo2._id = FAKE_ID_STRING_1;
+  void todosWithEqualIdAreEqual() {
+    todo1._id = FAKE_ID_STRING_1;
+    todo2._id = FAKE_ID_STRING_1;
 
-    assertTrue(Todo1.equals(Todo2));
+    assertTrue(todo1.equals(todo2));
   }
 
   @Test
-  void TodosWithDifferentIdAreNotEqual() {
-    Todo1._id = FAKE_ID_STRING_1;
-    Todo2._id = FAKE_ID_STRING_2;
+  void todosWithDifferentIdAreNotEqual() {
+    todo1._id = FAKE_ID_STRING_1;
+    todo2._id = FAKE_ID_STRING_2;
 
-    assertFalse(Todo1.equals(Todo2));
+    assertFalse(todo1.equals(todo2));
   }
 
   @Test
   void hashCodesAreBasedOnId() {
-    Todo1._id = FAKE_ID_STRING_1;
-    Todo2._id = FAKE_ID_STRING_1;
+    todo1._id = FAKE_ID_STRING_1;
+    todo2._id = FAKE_ID_STRING_1;
 
-    assertTrue(Todo1.hashCode() == Todo2.hashCode());
+    assertTrue(todo1.hashCode() == todo2.hashCode());
   }
 
   @SuppressWarnings("unlikely-arg-type")
   @Test
-  void TodosAreNotEqualToOtherKindsOfThings() {
-    Todo1._id = FAKE_ID_STRING_1;
+  void todosAreNotEqualToOtherKindsOfThings() {
+    todo1._id = FAKE_ID_STRING_1;
     // a Todo is not equal to its id even though id is used for checking equality
-    assertFalse(Todo1.equals(FAKE_ID_STRING_1));
+    assertFalse(todo1.equals(FAKE_ID_STRING_1));
   }
 }

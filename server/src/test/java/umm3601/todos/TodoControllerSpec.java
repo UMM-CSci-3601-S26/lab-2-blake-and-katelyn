@@ -46,7 +46,7 @@ public class TodoControllerSpec {
 
   // An instance of the controller we're testing that is prepared in
   // `setupEach()`, and then exercised in the various tests below.
-  private TodoController TodoController;
+  private TodoController todoController;
 
   // A Mongo object ID that is initialized in `setupEach()` and used
   // in a few of the tests. It isn't used all that often, though,
@@ -66,10 +66,10 @@ public class TodoControllerSpec {
   private Context ctx;
 
   @Captor
-  private ArgumentCaptor<ArrayList<Todo>> TodoArrayListCaptor;
+  private ArgumentCaptor<ArrayList<Todo>> todoArrayListCaptor;
 
   @Captor
-  private ArgumentCaptor<Todo> TodoCaptor;
+  private ArgumentCaptor<Todo> todoCaptor;
 
   @Captor
   private ArgumentCaptor<Map<String, String>> mapCaptor;
@@ -128,7 +128,7 @@ public class TodoControllerSpec {
     todoDocuments.insertMany(testTodos);
     todoDocuments.insertOne(sam);
 
-    TodoController = new TodoController(db);
+    todoController = new TodoController(db);
   }
 
   // @Test
@@ -145,14 +145,14 @@ public class TodoControllerSpec {
 
     when(ctx.queryParamMap()).thenReturn(Collections.emptyMap());
 
-    TodoController.getTodos(ctx);
+    todoController.getTodos(ctx);
 
-    verify(ctx).json(TodoArrayListCaptor.capture());
+    verify(ctx).json(todoArrayListCaptor.capture());
     verify(ctx).status(HttpStatus.OK);
 
     assertEquals(
         db.getCollection("todos").countDocuments(),
-        TodoArrayListCaptor.getValue().size());
+        todoArrayListCaptor.getValue().size());
   }
 
 }
