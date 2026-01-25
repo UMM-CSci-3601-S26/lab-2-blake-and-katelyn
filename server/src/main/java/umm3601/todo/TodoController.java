@@ -83,12 +83,12 @@ public class TodoController implements Controller {
     FindIterable<Todo> results = todoCollection.find(filter);
 
     // Apply sorting if present
-    if (sortingOrder != null){
+    if (sortingOrder != null) {
       results = results.sort(sortingOrder);
     }
 
     // Apply limit if present
-    if (limit != null){
+    if (limit != null) {
       results = results.limit(limit);
     }
 
@@ -100,9 +100,9 @@ public class TodoController implements Controller {
     ctx.status(HttpStatus.OK);
   }
 
-  private Integer parseLimit(Context ctx){
+  private Integer parseLimit(Context ctx) {
     // If no limit, no limit
-    if (!ctx.queryParamMap().containsKey("limit")){
+    if (!ctx.queryParamMap().containsKey("limit")) {
       return null;
     }
 
