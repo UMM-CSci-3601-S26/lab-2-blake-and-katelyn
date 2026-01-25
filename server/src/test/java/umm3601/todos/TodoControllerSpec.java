@@ -3,6 +3,8 @@ package umm3601.todos;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 // import static org.mockito.ArgumentMatchers.any;
+// import static org.mockito.ArgumentMatchers.argThat;
+// import static org.mockito.ArgumentMatchers.any;
 // import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -185,4 +187,68 @@ public class TodoControllerSpec {
 
     assertEquals("The requested todo was not found", exception.getMessage());
   }
+
+
+  @Test
+  void getTodosWithValidLimit() throws IOException {
+    when(ctx.queryParamMap()).thenReturn(Map.of("limit", List.of("2")));
+    when(ctx.queryParam("limit")).thenReturn("2");
+
+    todoController.getTodos(ctx);
+
+    verify(ctx).json(todoArrayListCaptor.capture());
+    verify(ctx).status(HttpStatus.OK);
+
+    assertEquals(2, todoArrayListCaptor.getValue().size());
+  }
+
+  @Test
+  void getTodosLargeLimitReturnsAllTodos() throws IOException {
+    when(ctx.queryParamMap()).thenReturn(Map.of("limit", List.of("100")));
+    when(ctx.queryParam("limit")).thenReturn("100");
+
+    todoController.getTodos(ctx);
+
+    verify(ctx).json(todoArrayListCaptor.capture());
+    verify(ctx).status(HttpStatus.OK);
+
+    assertEquals(4, todoArrayListCaptor.getValue().size());
+  }
+
+  @Test
+  void getTodosWithNonNumericLimitThrowsError() throws IOException {
+    when(ctx.queryParamMap()).thenReturn(Map.of("limit", List.of("abc")));
+    when(ctx.queryParam("limit")).thenReturn("abc");
+
+    BadRequestResponse exception = assertThrows(
+      BadRequestResponse.class,
+      () -> todoController.getTodos(ctx));
+
+    assertEquals("The limit must be a number.", exception.getMessage());
+  }
+
+  @Test
+  void getTodosWithNegativeLimitThrowsError() throws IOException {
+    when(ctx.queryParamMap()).thenReturn(Map.of("limit", List.of("-5")));
+    when(ctx.queryParam("limit")).thenReturn("-5");
+
+    BadRequestResponse exception = assertThrows(
+      BadRequestResponse.class,
+      () -> todoController.getTodos(ctx));
+
+    assertEquals("The limit must be a positive integer.", exception.getMessage());
+  }
+
+  @Test
+  void getTodosWithZeroLimitThrowsError() throws IOException {
+    when(ctx.queryParamMap()).thenReturn(Map.of("limit", List.of("0")));
+    when(ctx.queryParam("limit")).thenReturn("0");
+
+    BadRequestResponse exception = assertThrows(
+      BadRequestResponse.class,
+      () -> todoController.getTodos(ctx));
+
+    assertEquals("The limit must be a positive integer.", exception.getMessage());
+  }
 }
+

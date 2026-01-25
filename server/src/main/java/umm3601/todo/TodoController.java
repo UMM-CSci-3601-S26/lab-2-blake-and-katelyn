@@ -10,7 +10,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 // import java.util.Map;
-// import java.util.Objects;
+import java.util.Objects;
 // import java.util.regex.Pattern;
 
 import org.bson.Document;
@@ -19,8 +19,9 @@ import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.mongojack.JacksonMongoCollection;
 
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoDatabase;
-// import com.mongodb.client.model.Sorts;
+import com.mongodb.client.model.Sorts;
 // import com.mongodb.client.result.DeleteResult;
 
 import io.javalin.Javalin;
@@ -29,8 +30,6 @@ import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import io.javalin.http.NotFoundResponse;
 import umm3601.Controller;
-//import umm3601.user.User;
-//import umm3601.user.UserByCompany;
 
 public class TodoController implements Controller {
 
@@ -71,42 +70,78 @@ public class TodoController implements Controller {
 
 
   public void getTodos(Context ctx) {
-    Bson combinedFilter = constructFilter(ctx);
-    // Bson sortingOrder = constructSortingOrder(ctx);
+    // Build filters (status, contains, owner, category)
+    Bson filter = constructFilter(ctx);
 
-    ArrayList<Todo> matchingTodos = todoCollection
-      .find(combinedFilter)
-      // .sort(sortingOrder)
-      .into(new ArrayList<>());
+    // Parse Limit
+    Integer limit = parseLimit(ctx);
 
+    // Parse sorting order
+    Bson sortingOrder = constructSortingOrder(ctx);
+
+    // Build the MongoDB query
+    FindIterable<Todo> results = todoCollection.find(filter);
+
+    // Apply sorting if present
+    if (sortingOrder != null) {
+      results = results.sort(sortingOrder);
+    }
+
+    // Apply limit if present
+    if (limit != null) {
+      results = results.limit(limit);
+    }
+
+    // Materialize results
+    ArrayList<Todo> matchingTodos = results.into(new ArrayList<>());
+
+    // Return JSON
     ctx.json(matchingTodos);
-
     ctx.status(HttpStatus.OK);
+  }
+
+  private Integer parseLimit(Context ctx) {
+    // If no limit, no limit
+    if (!ctx.queryParamMap().containsKey("limit")) {
+      return null;
+    }
+
+    String limitParam = ctx.queryParam("limit");
+
+    try {
+      int limit = Integer.parseInt(limitParam);
+      if (limit < 1) {
+        throw new BadRequestResponse("The limit must be a positive integer.");
+      }
+      return limit;
+    } catch (NumberFormatException e) {
+      throw new BadRequestResponse("The limit must be a number.");
+    }
+
   }
 
   private Bson constructFilter(Context ctx) {
     List<Bson> filters = new ArrayList<>(); // start with an empty list of filters
 
-    // if (ctx.queryParamMap().containsKey(CAT_KEY)) {
-    //   Pattern pattern = Pattern.compile(Pattern.quote(ctx.queryParam(CAT_KEY)), Pattern.CASE_INSENSITIVE);
-    //   filters.add(regex(CAT_KEY, pattern));
-    // }
-    // if (ctx.queryParamMap().containsKey(CAT_KEY)) {
-    //   Pattern pattern = Pattern.compile(Pattern.quote(ctx.queryParam(CAT_KEY)), Pattern.CASE_INSENSITIVE);
-    //   filters.add(regex(CAT_KEY, pattern));
-    // }
-    // Combine the list of filters into a single filtering document.
+    // Owner Filter
+
+    // Category Filter
+
+    // Status Filter
+
+    // Contains Filter
+
     Bson combinedFilter = filters.isEmpty() ? new Document() : and(filters);
 
     return combinedFilter;
   }
 
-  // private Bson constructSortingOrder(Context ctx) {
-  //   String sortBy = Objects.requireNonNullElse(ctx.queryParam("sortby"), "name");
-  //   String sortOrder = Objects.requireNonNullElse(ctx.queryParam("sortorder"), "asc");
-  //   Bson sortingOrder = sortOrder.equals("desc") ?  Sorts.descending(sortBy) : Sorts.ascending(sortBy);
-  //   return sortingOrder;
-  // }
+  private Bson constructSortingOrder(Context ctx) {
+    String sortBy = Objects.requireNonNullElse(ctx.queryParam("sortby"), "name");
+    String sortOrder = Objects.requireNonNullElse(ctx.queryParam("sortorder"), "asc");
+    Bson sortingOrder = sortOrder.equals("desc") ?  Sorts.descending(sortBy) : Sorts.ascending(sortBy);
+    return sortingOrder;
+  }
 
 
   // public void addNewTodo(Context ctx) {
