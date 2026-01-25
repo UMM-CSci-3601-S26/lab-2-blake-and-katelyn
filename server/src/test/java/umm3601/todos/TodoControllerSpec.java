@@ -1,6 +1,7 @@
 package umm3601.todos;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 // import static org.mockito.ArgumentMatchers.any;
 // import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -32,9 +33,11 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
+import io.javalin.http.BadRequestResponse;
 // import io.javalin.Javalin;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
+import io.javalin.http.NotFoundResponse;
 // import io.javalin.json.JavalinJackson;
 import umm3601.todo.Todo;
 import umm3601.todo.TodoController;
@@ -43,19 +46,11 @@ import umm3601.todo.TodoController;
 @SuppressWarnings({ "MagicNumber" })
 public class TodoControllerSpec {
 
-
-  // An instance of the controller we're testing that is prepared in
-  // `setupEach()`, and then exercised in the various tests below.
   private TodoController todoController;
 
-  // A Mongo object ID that is initialized in `setupEach()` and used
-  // in a few of the tests. It isn't used all that often, though,
-  // which suggests that maybe we should extract the tests that
-  // care about it into their own spec file?
   private ObjectId samsId;
 
-  // The client and database that will be used
-  // for all the tests in this spec file.
+
   private static MongoClient mongoClient;
   private static MongoDatabase db;
 
@@ -120,7 +115,7 @@ public class TodoControllerSpec {
     samsId = new ObjectId();
     Document sam = new Document()
         .append("_id", samsId)
-        .append("owner", "Blob")
+        .append("owner", "Sam")
         .append("status", true)
         .append("body", "cillum commodo amet incididunt anim qui")
         .append("category", "School");
@@ -155,4 +150,39 @@ public class TodoControllerSpec {
         todoArrayListCaptor.getValue().size());
   }
 
+    @Test
+  void getTodoWithExistentId() throws IOException {
+    String id = samsId.toHexString();
+    when(ctx.pathParam("id")).thenReturn(id);
+
+    todoController.getTodo(ctx);
+
+    verify(ctx).json(todoCaptor.capture());
+    verify(ctx).status(HttpStatus.OK);
+    assertEquals("Sam", todoCaptor.getValue().owner);
+    assertEquals(samsId.toHexString(), todoCaptor.getValue()._id);
+  }
+
+  @Test
+  void getTodoWithBadId() throws IOException {
+    when(ctx.pathParam("id")).thenReturn("bad");
+
+    Throwable exception = assertThrows(BadRequestResponse.class, () -> {
+      todoController.getTodo(ctx);
+    });
+
+    assertEquals("The requested todo id wasn't a legal Mongo Object ID.", exception.getMessage());
+  }
+
+  @Test
+  void getTodoWithNonexistentId() throws IOException {
+    String id = "588935f5c668650dc77df581";
+    when(ctx.pathParam("id")).thenReturn(id);
+
+    Throwable exception = assertThrows(NotFoundResponse.class, () -> {
+      todoController.getTodo(ctx);
+    });
+
+    assertEquals("The requested todo was not found", exception.getMessage());
+  }
 }

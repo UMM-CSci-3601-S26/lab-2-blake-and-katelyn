@@ -1,8 +1,8 @@
 package umm3601.todo;
 
 import static com.mongodb.client.model.Filters.and;
-//import static com.mongodb.client.model.Filters.eq;
-//import static com.mongodb.client.model.Filters.regex;
+import static com.mongodb.client.model.Filters.eq;
+// import static com.mongodb.client.model.Filters.regex;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -16,7 +16,7 @@ import java.util.List;
 import org.bson.Document;
 import org.bson.UuidRepresentation;
 import org.bson.conversions.Bson;
-// import org.bson.types.ObjectId;
+import org.bson.types.ObjectId;
 import org.mongojack.JacksonMongoCollection;
 
 import com.mongodb.client.MongoDatabase;
@@ -24,10 +24,10 @@ import com.mongodb.client.MongoDatabase;
 // import com.mongodb.client.result.DeleteResult;
 
 import io.javalin.Javalin;
-// import io.javalin.http.BadRequestResponse;
+import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
-// import io.javalin.http.NotFoundResponse;
+import io.javalin.http.NotFoundResponse;
 import umm3601.Controller;
 //import umm3601.user.User;
 //import umm3601.user.UserByCompany;
@@ -35,7 +35,7 @@ import umm3601.Controller;
 public class TodoController implements Controller {
 
   private static final String API_TODO = "/api/todos";
- // private static final String API_TODO_BY_ID = "/api/todos/{id}";
+  private static final String API_TODO_BY_ID = "/api/todos/{id}";
   static final String OWNER_KEY = "owner";
   static final String STATUS_KEY = "status";
   static final String BODY_KEY = "body";
@@ -52,22 +52,22 @@ public class TodoController implements Controller {
         UuidRepresentation.STANDARD);
   }
 
-  // public void getTodo(Context ctx) {
-  //   String id = ctx.pathParam("id");
-  //   Todo todo;
+  public void getTodo(Context ctx) {
+    String id = ctx.pathParam("id");
+    Todo todo;
 
-  //   try {
-  //     todo = todoCollection.find(eq("_id", new ObjectId(id))).first();
-  //   } catch (IllegalArgumentException e) {
-  //     throw new BadRequestResponse("The requested user id wasn't a legal Mongo Object ID.");
-  //   }
-  //   if (todo == null) {
-  //     throw new NotFoundResponse("The requested todo was not found");
-  //   } else {
-  //     ctx.json(todo);
-  //     ctx.status(HttpStatus.OK);
-  //   }
-  // }
+    try {
+      todo = todoCollection.find(eq("_id", new ObjectId(id))).first();
+    } catch (IllegalArgumentException e) {
+      throw new BadRequestResponse("The requested todo id wasn't a legal Mongo Object ID.");
+    }
+    if (todo == null) {
+      throw new NotFoundResponse("The requested todo was not found");
+    } else {
+      ctx.json(todo);
+      ctx.status(HttpStatus.OK);
+    }
+  }
 
 
   public void getTodos(Context ctx) {
@@ -178,7 +178,7 @@ public class TodoController implements Controller {
   @Override
   public void addRoutes(Javalin server) {
 
-    // server.get(API_TODO_BY_ID, this::getTodo);
+    server.get(API_TODO_BY_ID, this::getTodo);
 
     server.get(API_TODO, this::getTodos);
 
