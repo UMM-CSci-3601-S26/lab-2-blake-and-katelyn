@@ -21,6 +21,7 @@ import org.mongojack.JacksonMongoCollection;
 
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
 // import com.mongodb.client.result.DeleteResult;
 
@@ -128,7 +129,18 @@ public class TodoController implements Controller {
     // Category Filter
 
     // Status Filter
-
+    if (ctx.queryParamMap().containsKey("status")) {
+      String statusParam = ctx.queryParam("status");
+      boolean statusValue;
+      if (statusParam.equalsIgnoreCase("complete")) {
+        statusValue = true;
+      } else if (statusParam.equalsIgnoreCase("incomplete")) {
+        statusValue = false;
+      } else {
+        throw new BadRequestResponse("Status must be 'complete' or 'incomplete'.");
+      }
+      filters.add(Filters.eq("status", statusValue));
+    }
     // Contains Filter
 
     Bson combinedFilter = filters.isEmpty() ? new Document() : and(filters);
