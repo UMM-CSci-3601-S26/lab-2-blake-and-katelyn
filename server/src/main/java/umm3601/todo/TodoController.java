@@ -2,7 +2,7 @@ package umm3601.todo;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
-// import static com.mongodb.client.model.Filters.regex;
+import static com.mongodb.client.model.Filters.regex;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 // import java.util.Map;
 import java.util.Objects;
-// import java.util.regex.Pattern;
+import java.util.regex.Pattern;
 
 import org.bson.Document;
 import org.bson.UuidRepresentation;
@@ -130,6 +130,9 @@ public class TodoController implements Controller {
     // Status Filter
 
     // Contains Filter
+    if (ctx.queryParamMap().containsKey("contains")) {
+      filters.add(regex(BODY_KEY, ctx.queryParam("contains"), "i"));
+    }
 
     Bson combinedFilter = filters.isEmpty() ? new Document() : and(filters);
 
