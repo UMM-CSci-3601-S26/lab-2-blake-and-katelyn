@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 // import java.util.Map;
 import java.util.Objects;
-// import java.util.regex.Pattern;
+import java.util.regex.Pattern;
 
 import org.bson.Document;
 import org.bson.UuidRepresentation;
@@ -131,7 +131,8 @@ public class TodoController implements Controller {
 
     // Contains Filter
     if (ctx.queryParamMap().containsKey("contains")) {
-      filters.add(regex(BODY_KEY, ctx.queryParam("contains"), "i"));
+      Pattern pattern = Pattern.compile(Pattern.quote(ctx.queryParam("contains")));
+      filters.add(regex(BODY_KEY, pattern));
     }
 
     Bson combinedFilter = filters.isEmpty() ? new Document() : and(filters);
