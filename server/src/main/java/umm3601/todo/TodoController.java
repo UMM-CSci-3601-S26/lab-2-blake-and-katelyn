@@ -2,16 +2,16 @@ package umm3601.todo;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Filters.regex;
+// import static com.mongodb.client.model.Filters.regex;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+// import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Pattern;
+// import java.util.regex.Pattern;
 
 import org.bson.Document;
 import org.bson.UuidRepresentation;
@@ -22,7 +22,7 @@ import org.mongojack.JacksonMongoCollection;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Sorts;
-import com.mongodb.client.result.DeleteResult;
+// import com.mongodb.client.result.DeleteResult;
 
 import io.javalin.Javalin;
 import io.javalin.http.BadRequestResponse;
@@ -106,10 +106,18 @@ public class TodoController implements Controller {
       return null;
     }
 
-    // Limit must be a positive integer to work
-    return ctx.queryParamAsClass("limit", Integer.class)
-    .check(it -> it > 0, "The limit must be positive integer.")
-    .get();
+    String limitParam = ctx.queryParam("limit");
+
+    try {
+      int limit = Integer.parseInt(limitParam);
+      if (limit < 1) {
+        throw new BadRequestResponse("The limit must be a positive integer.");
+      }
+      return limit;
+    } catch (NumberFormatException e) {
+      throw new BadRequestResponse("The limit must be a number.");
+    }
+
   }
 
   private Bson constructFilter(Context ctx) {
