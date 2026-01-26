@@ -250,6 +250,7 @@ public class TodoControllerSpec {
 
     assertEquals("The limit must be a positive integer.", exception.getMessage());
   }
+  
   @Test
   void getTodoWithOwner() throws IOException {
     when(ctx.queryParamMap()).thenReturn(Map.of("owner", List.of("Jack")));
@@ -260,7 +261,7 @@ public class TodoControllerSpec {
     verify(ctx).json(todoArrayListCaptor.capture());
     verify(ctx).status(HttpStatus.OK);
 
-    assertEquals(1,todoArrayListCaptor.getValue().size());   
+    assertEquals(1, todoArrayListCaptor.getValue().size());   
   }
 
 }
