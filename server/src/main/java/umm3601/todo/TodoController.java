@@ -125,6 +125,10 @@ public class TodoController implements Controller {
     List<Bson> filters = new ArrayList<>(); // start with an empty list of filters
 
     // Owner Filter
+    if (ctx.queryParamMap().containsKey("owner")) {
+      Pattern pattern = Pattern.compile(Pattern.quote(ctx.queryParam("owner")));
+      filters.add(regex(OWNER_KEY, pattern));
+    }
 
     // Category Filter
 
