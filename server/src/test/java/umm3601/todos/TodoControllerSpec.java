@@ -250,6 +250,44 @@ public class TodoControllerSpec {
 
     assertEquals("The limit must be a positive integer.", exception.getMessage());
   }
+@Test
+  void getTodosWithStatusComplete() throws IOException {
+    when(ctx.queryParamMap()).thenReturn(Map.of("status", List.of("complete")));
+    when(ctx.queryParam("status")).thenReturn("complete");
+
+    todoController.getTodos(ctx);
+
+    verify(ctx).json(todoArrayListCaptor.capture());
+    verify(ctx).status(HttpStatus.OK);
+
+    assertEquals(3, todoArrayListCaptor.getValue().size());
+  }
+
+  @Test
+  void getTodosWithStatusIncomplete() throws IOException {
+    when(ctx.queryParamMap()).thenReturn(Map.of("status", List.of("incomplete")));
+    when(ctx.queryParam("status")).thenReturn("incomplete");
+
+    todoController.getTodos(ctx);
+
+    verify(ctx).json(todoArrayListCaptor.capture());
+    verify(ctx).status(HttpStatus.OK);
+
+    assertEquals(1, todoArrayListCaptor.getValue().size());
+  }
+
+  @Test
+  void getTodosWithInvalidStatusThrowsError() throws IOException {
+    when(ctx.queryParamMap()).thenReturn(Map.of("status", List.of("done")));
+    when(ctx.queryParam("status")).thenReturn("done");
+
+    BadRequestResponse exception = assertThrows(
+      BadRequestResponse.class,
+      () -> todoController.getTodos(ctx));
+
+    assertEquals("Status must be 'complete' or 'incomplete'.", exception.getMessage());
+  }
+  
   @Test
   void getTodoWithOwner() throws IOException {
     when(ctx.queryParamMap()).thenReturn(Map.of("owner", List.of("Jack")));
@@ -260,8 +298,8 @@ public class TodoControllerSpec {
     verify(ctx).json(todoArrayListCaptor.capture());
     verify(ctx).status(HttpStatus.OK);
 
-    assertEquals(1, todoArrayListCaptor.getValue().size());
-    }
+    assertEquals(1,todoArrayListCaptor.getValue().size());   
+  }
 
 }
 
