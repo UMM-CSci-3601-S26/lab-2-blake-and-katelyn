@@ -126,20 +126,20 @@ public class TodoController implements Controller {
     List<Bson> filters = new ArrayList<>(); // start with an empty list of filters
 
     // Owner Filter
-    if (ctx.queryParamMap().containsKey("owner")) {
-      Pattern pattern = Pattern.compile(Pattern.quote(ctx.queryParam("owner")));
+    if (ctx.queryParamMap().containsKey(OWNER_KEY)) {
+      Pattern pattern = Pattern.compile(Pattern.quote(ctx.queryParam(OWNER_KEY)));
       filters.add(regex(OWNER_KEY, pattern));
     }
 
     // Category Filter
-    if (ctx.queryParamMap().containsKey("category")) {
-      Pattern pattern = Pattern.compile(Pattern.quote(ctx.queryParam("category")), Pattern.CASE_INSENSITIVE);
+    if (ctx.queryParamMap().containsKey(CAT_KEY)) {
+      Pattern pattern = Pattern.compile(Pattern.quote(ctx.queryParam(CAT_KEY)), Pattern.CASE_INSENSITIVE);
       filters.add(regex(CAT_KEY, pattern));
     }
 
     // Status Filter
-    if (ctx.queryParamMap().containsKey("status")) {
-      String statusParam = ctx.queryParam("status");
+    if (ctx.queryParamMap().containsKey(STATUS_KEY)) {
+      String statusParam = ctx.queryParam(STATUS_KEY);
       boolean statusValue;
       if (statusParam.equalsIgnoreCase("complete")) {
         statusValue = true;
@@ -148,7 +148,7 @@ public class TodoController implements Controller {
       } else {
         throw new BadRequestResponse("Status must be 'complete' or 'incomplete'.");
       }
-      filters.add(Filters.eq("status", statusValue));
+      filters.add(Filters.eq(STATUS_KEY, statusValue));
     }
     // Contains Filter
     if (ctx.queryParamMap().containsKey("contains")) {
@@ -163,15 +163,15 @@ public class TodoController implements Controller {
 
   private Bson constructSortingOrder(Context ctx) {
     // Default sorting (owner)
-    String sortBy = Objects.requireNonNullElse(ctx.queryParam("sortby"), "owner");
+    String sortBy = Objects.requireNonNullElse(ctx.queryParam("sortby"), OWNER_KEY);
 
     // Validating allowed fields
-    if (!List.of("owner", "body", "status", "category").contains(sortBy)) {
+    if (!List.of(OWNER_KEY, BODY_KEY, STATUS_KEY, CAT_KEY).contains(sortBy)) {
       throw new BadRequestResponse("Invalid sortby field.");
     }
 
     // asc or desc, default asc
-    String sortOrder = Objects.requireNonNullElse(ctx.queryParam("sortorder"), "asc");
+    String sortOrder = Objects.requireNonNullElse(ctx.queryParam(SORT_ORDER_KEY), "asc");
 
     if (sortOrder.equalsIgnoreCase("desc")) {
       return Sorts.descending(sortBy);
