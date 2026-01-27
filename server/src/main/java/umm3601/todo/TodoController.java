@@ -2,6 +2,7 @@ package umm3601.todo;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
+// import static com.mongodb.client.model.Filters.ne;
 import static com.mongodb.client.model.Filters.regex;
 
 import java.nio.charset.StandardCharsets;
@@ -161,10 +162,24 @@ public class TodoController implements Controller {
   }
 
   private Bson constructSortingOrder(Context ctx) {
-    String sortBy = Objects.requireNonNullElse(ctx.queryParam("sortby"), "name");
+    // Default sorting (owner)
+    String sortBy = Objects.requireNonNullElse(ctx.queryParam("sortby"), "owner");
+
+    // Validating allowed fields
+    if (!List.of("owner", "body", "status", "category").contains(sortBy)) {
+      throw new BadRequestResponse("Invalid sortby field.");
+    }
+
+    // asc or desc, default asc
     String sortOrder = Objects.requireNonNullElse(ctx.queryParam("sortorder"), "asc");
-    Bson sortingOrder = sortOrder.equals("desc") ?  Sorts.descending(sortBy) : Sorts.ascending(sortBy);
-    return sortingOrder;
+
+    if (sortOrder.equalsIgnoreCase("desc")) {
+      return Sorts.descending(sortBy);
+    } else if (sortOrder.equalsIgnoreCase("asc")) {
+      return Sorts.ascending(sortBy);
+    } else {
+      throw new BadRequestResponse("sortorder must be 'asc' or 'desc'");
+    }
   }
 
 

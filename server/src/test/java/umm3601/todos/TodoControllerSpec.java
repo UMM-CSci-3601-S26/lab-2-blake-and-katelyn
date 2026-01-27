@@ -312,5 +312,60 @@ public class TodoControllerSpec {
     assertEquals(2, todoArrayListCaptor.getValue().size());
   }
 
+  @Test
+  public void canSortTodosByOwnerAscending() throws IOException {
+    when(ctx.queryParam("sortBy")).thenReturn("owner");
+    when(ctx.queryParam("sortOrder")).thenReturn("asc");
+
+    todoController.getTodos(ctx);
+
+    verify(ctx).json(todoArrayListCaptor.capture());
+    verify(ctx).status(HttpStatus.OK);
+
+    ArrayList<Todo> result = todoArrayListCaptor.getValue();
+
+    assertEquals(4, result.size());
+
+    Todo chris = result.get(0);
+    assertEquals("Chris", chris.owner);
+    assertEquals(true, chris.status);
+    Todo jack = result.get(1);
+    assertEquals(true, jack.status);
+    assertEquals("Jack", jack.owner);
+    Todo lynn = result.get(2);
+    assertEquals("Lynn", lynn.owner);
+    assertEquals(false, lynn.status);
+    Todo sam = result.get(3);
+    assertEquals("Sam", sam.owner);
+    assertEquals(true, sam.status);
+  }
+
+  @Test
+  public void canSortTodosByOwnerDecending() throws IOException {
+    when(ctx.queryParam("sortBy")).thenReturn("owner");
+    when(ctx.queryParam("sortOrder")).thenReturn("desc");
+
+    todoController.getTodos(ctx);
+
+    verify(ctx).json(todoArrayListCaptor.capture());
+    verify(ctx).status(HttpStatus.OK);
+
+    ArrayList<Todo> result = todoArrayListCaptor.getValue();
+
+    assertEquals(4, result.size());
+
+    Todo sam = result.get(3);
+    assertEquals("Sam", sam.owner);
+    assertEquals(true, sam.status);
+    Todo lynn = result.get(2);
+    assertEquals(false, lynn.status);
+    assertEquals("Lynn", lynn.owner);
+    Todo jack = result.get(1);
+    assertEquals("Jack", jack.owner);
+    assertEquals(true, jack.status);
+    Todo chris = result.get(0);
+    assertEquals("Chris", chris.owner);
+    assertEquals(true, chris.status);
+  }
 }
 
