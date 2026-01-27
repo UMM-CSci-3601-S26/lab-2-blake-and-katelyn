@@ -132,6 +132,10 @@ public class TodoController implements Controller {
     }
 
     // Category Filter
+    if (ctx.queryParamMap().containsKey("category")) {
+      Pattern pattern = Pattern.compile(Pattern.quote(ctx.queryParam("category")), Pattern.CASE_INSENSITIVE);
+      filters.add(regex(CAT_KEY, pattern));
+    }
 
     // Status Filter
     if (ctx.queryParamMap().containsKey("status")) {
