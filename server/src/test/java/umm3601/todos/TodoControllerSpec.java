@@ -299,6 +299,18 @@ public class TodoControllerSpec {
 
     assertEquals(1, todoArrayListCaptor.getValue().size());
   }
+  @Test
+  void getTodoWithCategory() throws IOException {
+    when(ctx.queryParamMap()).thenReturn(Map.of("category", List.of("School")));
+    when(ctx.queryParam("category")).thenReturn("School");
+
+    todoController.getTodos(ctx);
+
+    verify(ctx).json(todoArrayListCaptor.capture());
+    verify(ctx).status(HttpStatus.OK);
+
+    assertEquals(2, todoArrayListCaptor.getValue().size());
+  }
 
 }
 
