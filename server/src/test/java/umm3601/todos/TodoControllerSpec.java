@@ -52,12 +52,8 @@ public class TodoControllerSpec {
 
   private ObjectId samsId;
 
-
   private static MongoClient mongoClient;
   private static MongoDatabase db;
-
-  // Used to translate between JSON and POJOs.
-  //private static JavalinJackson javalinJackson = new JavalinJackson();
 
   @Mock
   private Context ctx;
@@ -92,6 +88,7 @@ public class TodoControllerSpec {
   void setupEach() throws IOException {
     MockitoAnnotations.openMocks(this);
 
+    // Setup database
     MongoCollection<Document> todoDocuments = db.getCollection("todos");
     todoDocuments.drop();
     List<Document> testTodos = new ArrayList<>();
@@ -99,13 +96,13 @@ public class TodoControllerSpec {
         new Document()
             .append("owner", "Chris")
             .append("status", true)
-            .append("body", "cillum commodo amet incididunt anim qui")
+            .append("body", "amet incididunt anim qui")
             .append("category", "Food"));
     testTodos.add(
         new Document()
             .append("owner", "Lynn")
             .append("status", false)
-            .append("body", "cillum commodo amet incididunt anim qui")
+            .append("body", "incididunt anim qui")
             .append("category", "School"));
     testTodos.add(
         new Document()
@@ -119,7 +116,7 @@ public class TodoControllerSpec {
         .append("_id", samsId)
         .append("owner", "Sam")
         .append("status", true)
-        .append("body", "cillum commodo amet incididunt anim qui")
+        .append("body", "commodo cillum amet incididunt anim qui")
         .append("category", "School");
 
     todoDocuments.insertMany(testTodos);
@@ -128,18 +125,8 @@ public class TodoControllerSpec {
     todoController = new TodoController(db);
   }
 
-  // @Test
-  // void addsRoutes() {
-  //   Javalin mockServer = mock(Javalin.class);
-  //   TodoController.addRoutes(mockServer);
-  //   verify(mockServer, Mockito.atLeast(3)).get(any(), any());
-  //   verify(mockServer, Mockito.atLeastOnce()).post(any(), any());
-  //   verify(mockServer, Mockito.atLeastOnce()).delete(any(), any());
-  // }
-
   @Test
   void canGetAllTodos() throws IOException {
-
     when(ctx.queryParamMap()).thenReturn(Collections.emptyMap());
 
     todoController.getTodos(ctx);
@@ -287,6 +274,7 @@ public class TodoControllerSpec {
 
     assertEquals("Status must be 'complete' or 'incomplete'.", exception.getMessage());
   }
+
   @Test
   void getTodoWithOwner() throws IOException {
     when(ctx.queryParamMap()).thenReturn(Map.of("owner", List.of("Jack")));
@@ -299,6 +287,7 @@ public class TodoControllerSpec {
 
     assertEquals(1, todoArrayListCaptor.getValue().size());
   }
+
   @Test
   void getTodoWithCategory() throws IOException {
     when(ctx.queryParamMap()).thenReturn(Map.of("category", List.of("School")));
