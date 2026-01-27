@@ -5,9 +5,6 @@ import static com.mongodb.client.model.Filters.eq;
 // import static com.mongodb.client.model.Filters.ne;
 import static com.mongodb.client.model.Filters.regex;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 // import java.util.Map;
@@ -45,6 +42,8 @@ public class TodoController implements Controller {
 
   private final JacksonMongoCollection<Todo> todoCollection;
 
+  // Constructs a controller for todos
+
   public TodoController(MongoDatabase database) {
     todoCollection = JacksonMongoCollection.builder().build(
         database,
@@ -52,6 +51,8 @@ public class TodoController implements Controller {
         Todo.class,
         UuidRepresentation.STANDARD);
   }
+
+  // Set the json file for a single searched `id`
 
   public void getTodo(Context ctx) {
     String id = ctx.pathParam("id");
@@ -70,6 +71,7 @@ public class TodoController implements Controller {
     }
   }
 
+  // Set the json file for seeing all todos
 
   public void getTodos(Context ctx) {
     // Build filters (status, contains, owner, category)
@@ -89,6 +91,9 @@ public class TodoController implements Controller {
       results = results.sort(sortingOrder);
     }
 
+    /* All the filters and sorting are put first
+       to allow limiting to be the last computed */
+
     // Apply limit if present
     if (limit != null) {
       results = results.limit(limit);
@@ -101,6 +106,11 @@ public class TodoController implements Controller {
     ctx.json(matchingTodos);
     ctx.status(HttpStatus.OK);
   }
+
+/**
+ * Constructing a Bson limited to use in the `limit` method based on the
+ * query parameter given from the context (ctx).
+ */
 
   private Integer parseLimit(Context ctx) {
     // If no limit, no limit
@@ -121,6 +131,15 @@ public class TodoController implements Controller {
     }
 
   }
+
+/**
+ * Constructing a Bson filter to use in the `find` method based on the
+ * query parameters given from the context (ctx).
+ *
+ * Checking for the presence of `owner`, `status`, `body`, and `category`
+ * parameters and creating a filter document that will match todos with
+ * the specified values for those fields.
+ */
 
   private Bson constructFilter(Context ctx) {
     List<Bson> filters = new ArrayList<>(); // start with an empty list of filters
@@ -150,6 +169,7 @@ public class TodoController implements Controller {
       }
       filters.add(Filters.eq(STATUS_KEY, statusValue));
     }
+
     // Contains Filter
     if (ctx.queryParamMap().containsKey("contains")) {
       Pattern pattern = Pattern.compile(Pattern.quote(ctx.queryParam("contains")));
@@ -182,9 +202,7 @@ public class TodoController implements Controller {
     }
   }
 
-
   // public void addNewTodo(Context ctx) {
-
   //   String body = ctx.body();
   //   Todo newTodo = ctx.bodyValidator(Todo.class)
   //     .check(td -> td.owner != null && td.owner.length() > 0,
@@ -198,15 +216,7 @@ public class TodoController implements Controller {
 
   //   todoCollection.insertOne(newTodo);
 
-  //   // Set the JSON response to be the `_id` of the newly created user.
-  //   // This gives the client the opportunity to know the ID of the new user,
-  //   // which it can then use to perform further operations (e.g., a GET request
-  //   // to get and display the details of the new user).
   //   ctx.json(Map.of("id", newTodo._id));
-  //   // 201 (`HttpStatus.CREATED`) is the HTTP code for when we successfully
-  //   // create a new resource (a user in this case).
-  //   // See, e.g., https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
-  //   // for a description of the various response codes.
   //   ctx.status(HttpStatus.CREATED);
   // }
 
@@ -224,30 +234,6 @@ public class TodoController implements Controller {
   //   }
   //   ctx.status(HttpStatus.OK);
   // }
-
-  // String generateAvatar(String email) {
-  //   String avatar;
-  //   try {
-  //     // generate unique md5 code for identicon
-  //     avatar = "https://gravatar.com/avatar/" + md5(email) + "?d=identicon";
-  //   } catch (NoSuchAlgorithmException ignored) {
-  //     // set to mystery person
-  //     avatar = "https://gravatar.com/avatar/?d=mp";
-  //   }
-  //   return avatar;
-  // }
-
-
-  public String md5(String str) throws NoSuchAlgorithmException {
-    MessageDigest md = MessageDigest.getInstance("MD5");
-    byte[] hashInBytes = md.digest(str.toLowerCase().getBytes(StandardCharsets.UTF_8));
-
-    StringBuilder result = new StringBuilder();
-    for (byte b : hashInBytes) {
-      result.append(String.format("%02x", b));
-    }
-    return result.toString();
-  }
 
   @Override
   public void addRoutes(Javalin server) {
